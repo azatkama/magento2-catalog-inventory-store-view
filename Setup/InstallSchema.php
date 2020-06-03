@@ -25,12 +25,15 @@ class InstallSchema implements InstallSchemaInterface
         $tableName = $setup->getTable('cataloginventory_stock_item');
         $connection = $setup->getConnection();
 
-        $connection->addColumn($tableName, 'store_id', Table::TYPE_BIGINT, null, [
-            'nullable' => false
-        ], 'Store ID');
+        $connection->addColumn($tableName, 'store_id', [
+            'type' => Table::TYPE_BIGINT,
+            'nullable' => false,
+            'default' => 0,
+            'comment' => 'Store ID',
+        ]);
 
-        $connection->dropIndex($tableName, 'CATINV_STOCK_ITEM_PRD_ID_CAT_PRD_ENTT_ENTT_ID');
-        $connection->dropIndex($tableName, 'CATINV_STOCK_ITEM_STOCK_ID_CATINV_STOCK_STOCK_ID');
+        $connection->dropForeignKey($tableName, 'CATINV_STOCK_ITEM_PRD_ID_CAT_PRD_ENTT_ENTT_ID');
+        $connection->dropForeignKey($tableName, 'CATINV_STOCK_ITEM_STOCK_ID_CATINV_STOCK_STOCK_ID');
         $connection->dropIndex($tableName, 'CATALOGINVENTORY_STOCK_ITEM_PRODUCT_ID_STOCK_ID');
 
         $connection->addForeignKey(

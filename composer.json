@@ -1,0 +1,21 @@
+{
+    "name": "azatkama/module-inventory-scopes",
+    "type": "magento2-module",
+    "authors": [
+        {
+            "name": "Azat Sheredeka",
+            "email": "sheredeka_azat@mail.ru"
+        }
+    ],
+    "require": {
+        "magento/framework": ">=102.0.1"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Azatkama\\InventoryScopes\\": ""
+        }
+    }
+}

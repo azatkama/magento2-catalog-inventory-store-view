@@ -9,8 +9,9 @@
         }
     ],
     "require": {
-        "php": "~7.3.0",
-        "magento/framework": "~102.0.0"
+        "php": "^7.3",
+        "magento/framework": "^102.0",
+        "magento/module-catalog-inventory": "^100.3"
     },
     "autoload": {
         "files": [

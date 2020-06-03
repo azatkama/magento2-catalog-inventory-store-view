@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Azatkama\CatalogInventoryStoreView;
+namespace Azatkama\CatalogInventoryStoreView\Setup;
 
 use Magento\Framework\Setup\InstallSchemaInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
@@ -21,23 +21,40 @@ class InstallSchema implements InstallSchemaInterface
      */
     public function install(SchemaSetupInterface $setup, ModuleContextInterface $context)
     {
-        $installer = $setup;
+        $setup->startSetup();
+        $tableName = $setup->getTable('cataloginventory_stock_item');
+        $connection = $setup->getConnection();
 
-        $installer->startSetup();
-        $tableName = $installer->getTable('cataloginventory_stock_item');
+        $connection->addColumn($tableName, 'store_id', Table::TYPE_BIGINT, null, [
+            'nullable' => false
+        ], 'Store ID');
 
-        $table = $installer->getConnection()
-            ->addColumn($tableName, 'store_id', Table::TYPE_BIGINT, null, [
-                'nullable' => false
-            ], 'Store ID');
+        $connection->dropIndex($tableName, 'CATINV_STOCK_ITEM_PRD_ID_CAT_PRD_ENTT_ENTT_ID');
+        $connection->dropIndex($tableName, 'CATINV_STOCK_ITEM_STOCK_ID_CATINV_STOCK_STOCK_ID');
+        $connection->dropIndex($tableName, 'CATALOGINVENTORY_STOCK_ITEM_PRODUCT_ID_STOCK_ID');
 
-        $table->dropIndex($tableName, 'CATALOGINVENTORY_STOCK_ITEM_PRODUCT_ID_STOCK_ID');
-        $table->addIndex($tableName, 'CATALOGINVENTORY_STOCK_ITEM_PRODUCT_ID_STOCK_ID', [
+        $connection->addForeignKey(
+            'CATINV_STOCK_ITEM_PRD_ID_CAT_PRD_ENTT_ENTT_ID',
+            $tableName,
+            'product_id',
+            $setup->getTable('catalog_product_entity'),
+            'entity_id'
+        );
+
+        $connection->addForeignKey(
+            'CATINV_STOCK_ITEM_STOCK_ID_CATINV_STOCK_STOCK_ID',
+            $tableName,
+            'stock_id',
+            $setup->getTable('cataloginventory_stock'),
+            'stock_id'
+        );
+
+        $connection->addIndex($tableName, 'CATALOGINVENTORY_STOCK_ITEM_PRODUCT_ID_STOCK_ID', [
             'product_id',
             'stock_id',
             'store_id',
-        ]);
+        ], AdapterInterface::INDEX_TYPE_UNIQUE);
 
-        $installer->endSetup();
+        $setup->endSetup();
     }
 }

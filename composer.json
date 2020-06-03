@@ -1,6 +1,7 @@
 {
-    "name": "azatkama/module-inventory-scopes",
+    "name": "azatkama/module-catalog-inventory-store-view",
     "type": "magento2-module",
+    "version": "1.0.0",
     "authors": [
         {
             "name": "Azat Sheredeka",
@@ -8,14 +9,15 @@
         }
     ],
     "require": {
-        "magento/framework": ">=102.0.1"
+        "php": "~7.3.0",
+        "magento/framework": "~102.0.0"
     },
     "autoload": {
         "files": [
             "registration.php"
         ],
         "psr-4": {
-            "Azatkama\\InventoryScopes\\": ""
+            "Azatkama\\CatalogInventoryStoreView\\": ""
         }
     }
 }

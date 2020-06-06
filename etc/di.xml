@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Azatkama\CatalogInventoryStoreView\Api\StockStoreItemRepositoryInterface" type="Azatkama\CatalogInventoryStoreView\Model\StockStoreItemRepository" />
+    <preference for="Azatkama\CatalogInventoryStoreView\Api\StockStoreItemCriteriaInterface" type="Azatkama\CatalogInventoryStoreView\Model\ResourceModel\StockStoreItemCriteria" />
+    <preference for="Azatkama\CatalogInventoryStoreView\Api\Data\StockStoreItemInterface" type="Azatkama\CatalogInventoryStoreView\Model\StockStoreItem" />
+    <preference for="Azatkama\CatalogInventoryStoreView\Api\Data\StockStoreItemCollectionInterface" type="Azatkama\CatalogInventoryStoreView\Model\ResourceModel\Collection" />
+
+    <type name="Magento\CatalogInventory\Api\StockItemRepositoryInterface">
+        <plugin
+            name="Azatkama\CatalogInventoryStoreView\Plugin\StockItemRepositoryPlugin"
+            type="Azatkama\CatalogInventoryStoreView\Plugin\StockItemRepositoryPlugin"
+            sortOrder="1"
+        />
+    </type>
+
+    <type name="Magento\CatalogInventory\Api\Data\StockItemInterface">
+        <plugin
+            name="Azatkama\CatalogInventoryStoreView\Plugin\StockItemPlugin"
+            type="Azatkama\CatalogInventoryStoreView\Plugin\StockItemPlugin"
+            sortOrder="1"
+        />
+    </type>
+
+    <type name="Magento\CatalogInventory\Ui\DataProvider\Product\Form\Modifier\AdvancedInventory">
+        <plugin
+            name="Azatkama\CatalogInventoryStoreView\Plugin\AdvancedInventoryPlugin"
+            type="Azatkama\CatalogInventoryStoreView\Plugin\AdvancedInventoryPlugin"
+            sortOrder="1"
+        />
+    </type>
+</config>

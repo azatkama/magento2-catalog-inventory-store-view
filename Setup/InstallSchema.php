@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Azatkama\CatalogInventoryStoreView\Setup;
 
+use Magento\Framework\DB\Adapter\AdapterInterface;
+use Magento\Framework\DB\Ddl\Table;
 use Magento\Framework\Setup\InstallSchemaInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
-use Magento\Framework\DB\Ddl\Table;
-use \Magento\Framework\DB\Adapter\AdapterInterface;
 
 class InstallSchema implements InstallSchemaInterface
 {
@@ -22,41 +22,48 @@ class InstallSchema implements InstallSchemaInterface
     public function install(SchemaSetupInterface $setup, ModuleContextInterface $context)
     {
         $setup->startSetup();
-        $tableName = $setup->getTable('cataloginventory_stock_item');
+        $tableName = $setup->getTable('cataloginventory_stock_store_item');
         $connection = $setup->getConnection();
 
-        $connection->addColumn($tableName, 'store_id', [
-            'type' => Table::TYPE_BIGINT,
-            'nullable' => false,
-            'default' => 0,
-            'comment' => 'Store ID',
-        ]);
+        $table = $connection
+            ->newTable($tableName)
+            ->addColumn('id', Table::TYPE_BIGINT, null, [
+                'nullable' => false,
+                'primary' => true,
+                'unsigned' => true,
+                'identity' => true,
+            ], 'ID')
+            ->addColumn('item_id', Table::TYPE_INTEGER, 10, [
+                'nullable' => false,
+                'unsigned' => true,
+            ], 'Item ID')
+            ->addColumn('store_id', Table::TYPE_BIGINT, null, [
+                'nullable' => false,
+                'unsigned' => true,
+                'default' => 0,
+            ], 'Store ID')
+            ->addColumn('min_qty', Table::TYPE_DECIMAL, '12,4', [
+                'nullable' => false,
+                'default' => 0,
+            ], 'Min Qty')
+            ->addColumn('use_config_min_qty', Table::TYPE_SMALLINT, null, [
+                'nullable' => false,
+                'default' => 1,
+            ], 'Use Config Min Qty')
+            ->addForeignKey(
+                'cataloginventory_stock_store_item_item_id_fk',
+                'item_id',
+                $setup->getTable('cataloginventory_stock_item'),
+                'item_id',
+                Table::ACTION_CASCADE,
+            )
+            ->addIndex(
+                'cataloginventory_stock_store_item_item_id_store_id',
+                ['item_id', 'store_id'],
+                ['type' => AdapterInterface::INDEX_TYPE_UNIQUE]
+            );
 
-        $connection->dropForeignKey($tableName, 'CATINV_STOCK_ITEM_PRD_ID_CAT_PRD_ENTT_ENTT_ID');
-        $connection->dropForeignKey($tableName, 'CATINV_STOCK_ITEM_STOCK_ID_CATINV_STOCK_STOCK_ID');
-        $connection->dropIndex($tableName, 'CATALOGINVENTORY_STOCK_ITEM_PRODUCT_ID_STOCK_ID');
-
-        $connection->addForeignKey(
-            'CATINV_STOCK_ITEM_PRD_ID_CAT_PRD_ENTT_ENTT_ID',
-            $tableName,
-            'product_id',
-            $setup->getTable('catalog_product_entity'),
-            'entity_id'
-        );
-
-        $connection->addForeignKey(
-            'CATINV_STOCK_ITEM_STOCK_ID_CATINV_STOCK_STOCK_ID',
-            $tableName,
-            'stock_id',
-            $setup->getTable('cataloginventory_stock'),
-            'stock_id'
-        );
-
-        $connection->addIndex($tableName, 'CATALOGINVENTORY_STOCK_ITEM_PRODUCT_ID_STOCK_ID', [
-            'product_id',
-            'stock_id',
-            'store_id',
-        ], AdapterInterface::INDEX_TYPE_UNIQUE);
+        $connection->createTable($table);
 
         $setup->endSetup();
     }

@@ -10,6 +10,8 @@ use Magento\CatalogInventory\Api\Data\StockItemInterface;
 use Magento\CatalogInventory\Api\StockConfigurationInterface;
 use Magento\CatalogInventory\Api\StockItemRepositoryInterface;
 use Magento\CatalogInventory\Model\Stock\Item;
+use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+use Magento\Framework\App\ObjectManager;
 
 class StockItemRepositoryPlugin
 {
@@ -29,10 +31,13 @@ class StockItemRepositoryPlugin
      */
     public function __construct(
         StockStoreItemRepositoryInterface $stockStoreItemRepository,
-        StockConfigurationInterface $stockConfiguration
+        StockConfigurationInterface $stockConfiguration,
+        CollectionFactory $productCollectionFactory = null
     ) {
         $this->stockStoreItemRepository = $stockStoreItemRepository;
         $this->stockConfiguration = $stockConfiguration;
+        $this->productCollectionFactory = $productCollectionFactory ?: ObjectManager::getInstance()
+            ->get(CollectionFactory::class);
     }
 
     /**
@@ -45,11 +50,22 @@ class StockItemRepositoryPlugin
         callable $proceed,
         StockItemInterface $stockItem
     ) {
+        /** @var \Magento\Catalog\Model\Product $product */
+        $product = $this->productCollectionFactory->create()
+            ->setFlag('has_stock_status_filter')
+            ->addIdFilter($stockItem->getProductId())
+            ->addFieldToSelect('type_id')
+            ->getFirstItem();
+
+        if (!$product->getId()) {
+            return $stockItem;
+        }
+
         /** @var array $data */
         $data = $stockItem->getData();
 
-        $minQty = (float)$data[StockStoreItem::MIN_QTY];
-        $useConfigMinQty = (bool)$data[StockStoreItem::USE_CONFIG_MIN_QTY];
+        $minQty = (float)($data[StockStoreItem::MIN_QTY] ?? 0);
+        $useConfigMinQty = (bool)($data[StockStoreItem::USE_CONFIG_MIN_QTY] ?? true);
         $data[StockStoreItem::MIN_QTY] = $this->stockConfiguration->getMinQty($stockItem->getStoreId());
         $data[StockStoreItem::USE_CONFIG_MIN_QTY] = true;
 
